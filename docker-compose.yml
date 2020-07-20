@@ -1,0 +1,44 @@
+version: '3'
+services:
+
+  api:
+    build: ./api
+    ports:
+      - "8080:8080"
+    environment:
+      PORT: 8080
+      DB: 'postgres://api_user:mysecretpassword@db-internal.camharris.me/api'
+    networks:
+      mynetwork:
+        aliases:
+          - api-app.camharris.me
+  
+  web:
+    build: ../node-3tier-app-web
+    ports:
+      - "80:80"
+    environment:
+      PORT: 80
+      API_HOST: http://api-app.camharris.me:8080
+    networks:
+      mynetwork:
+        aliases:
+          - web-app.camharris.me
+
+  db:
+    image: postgres
+    environment:
+      POSTGRES_PASSWORD: 'mysecretpassword'
+      POSTGRES_USER: api_user
+      POSTGRES_DB: api
+    ports:
+      - "5432:5432"
+    networks:
+      mynetwork:
+        aliases:
+          - db-internal.camharris.me
+
+networks:
+  mynetwork:
+    driver: bridge
+  
